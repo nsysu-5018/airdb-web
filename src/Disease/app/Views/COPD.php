@@ -657,13 +657,6 @@
     <?php echo view("basic/Js") ?>
 
     <script type="text/javascript">
-        // Set aqi_based_Day to day before today
-        day = new Date();
-        day.setDate(day.getDate() - 1);
-        day_str = day.toISOString().split('T')[0]
-        $('#aqi_based_Day').val(day_str);
-        aqi_max_day = new Date(day_str);
-
         getAllName("<?php echo base_url('COPD/getAllName')?>", '#inputCheckbox');
 
         $('#btn_load_aqi').on('click', () => {
@@ -676,16 +669,6 @@
             }
             else
             {
-                aqi_input_day = new Date(date);
-                if (aqi_input_day > aqi_max_day)
-                {
-                    Swal.fire({
-                        title: '錯誤',
-                        html: '「空汙基準日」輸入錯誤<br/>可輸入的最大值為 ' + day_str,
-                        icon: 'warning'
-                    });
-                    return;
-                }
                 $.ajax({
                     url: "<?php echo base_url('COPD/FetchAQI') ?>",
                     method: "post",
