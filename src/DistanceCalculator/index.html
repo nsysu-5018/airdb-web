@@ -1,0 +1,209 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Distance Calculator</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+    integrity="sha256-PI8n5gCcz9cQqQXm3PEtDuPG8qx9oFsFctPg0S5zb8g=" crossorigin="anonymous">
+</head>
+
+<body>
+  <h1 class="text-center">Distance Calculator</h1>
+  <h5 class="text-center">Made with Google Maps API</h3>
+    <h6 class="text-center">By <a href="mailto:m123040019@nsysu.edu.tw">Zhe-Jia Yang</a></h4>
+      <div class="container">
+        <div class="row">
+          <div class="col">
+            <div class="form-floating">
+              <textarea class="form-control" id="PointA" style="max-height: 300px;"></textarea>
+              <label for="PointA">A 點 (可輸入多組，一行視為一組)</label>
+            </div>
+          </div>
+          <div class="col">
+            <div class="form-floating">
+              <textarea class="form-control" id="PointB" style="max-height: 300px;"></textarea>
+              <label for="PointB">B 點 (可輸入多組，一行視為一組)</label>
+            </div>
+          </div>
+        </div>
+        <div class="d-grid gap-2 mx-auto my-3">
+          <button type="button" class="btn btn-primary" id="btn_calc">開始計算</button>
+        </div>
+        <div class="my-3">
+          <hr />
+        </div>
+        <div class="d-grid gap-2 mx-auto my-3">
+          <button type="button" class="btn btn-success" id="btn_export">匯出結果至 Excel</button>
+        </div>
+        <table class="table table-bordered">
+          <thead>
+            <tr>
+              <th scope="col">A 點地址</th>
+              <th scope="col">A 點經度</th>
+              <th scope="col">A 點緯度</th>
+              <th scope="col">B 點地址</th>
+              <th scope="col">B 點經度</th>
+              <th scope="col">B 點緯度</th>
+              <th scope="col">直線距離 (公尺)</th>
+            </tr>
+          </thead>
+          <tbody id="tbody">
+          </tbody>
+        </table>
+      </div>
+      <div class="modal fade" id="modal_input_key" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title">輸入 API Key</h5>
+            </div>
+            <div class="modal-body">
+              <p>本服務需要使用 Google Maps API，請輸入 API Key 以繼續使用</p>
+              <div class="mb-3 row">
+                <label for="api_key" class="col-sm-2 col-form-label">API Key</label>
+                <div class="col-sm-10">
+                  <input type="text" class="form-control" id="api_key">
+                </div>
+              </div>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-primary" id="btn_save_key">繼續</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <script src="https://code.jquery.com/jquery-3.7.1.min.js"
+        integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
+      <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.min.js"
+        integrity="sha256-3gQJhtmj7YnV1fmtbVcnAV6eI4ws0Tr48bVZCThtCGQ=" crossorigin="anonymous"></script>
+      <script src="https://cdn.jsdelivr.net/npm/autosize@6.0.1/dist/autosize.min.js"
+        integrity="sha256-VCHx3GCDnd156mCM5EM9bJTj7mhMrrwg2tAab9B1vQs=" crossorigin="anonymous"></script>
+      <script src="https://cdn.jsdelivr.net/npm/axios@1.7.9/dist/axios.min.js"
+        integrity="sha256-nPSCRFgdbLZIbWcC9zcikihPrvJImjvkGawbxwYGvnI=" crossorigin="anonymous"></script>
+      <script src="https://cdn.jsdelivr.net/npm/geolib@3.3.4/lib/index.min.js"></script>
+      <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"
+        integrity="sha256-yVBhl8r4CaB1tt7h2g02+xnacVj/6KiOewyWxdhiPJk=" crossorigin="anonymous"></script>
+      <script>
+        const modal_input_key = new bootstrap.Modal('#modal_input_key');
+        const searchParams = new URLSearchParams(window.location.search);
+        searchParams.set("API_KEY", "AIzaSyCuEq2CQ4RxgDLAzJfe1mdVyyty0Y49d_Q");
+        if (searchParams.get("API_KEY") == null) {
+          $("#btn_save_key").on("click", () => {
+            if ($("#api_key").val() != "") {
+              let newParams = new URLSearchParams(window.location.search);
+              newParams.append("API_KEY", $("#api_key").val());
+              window.location.href = window.location.pathname + "?" + newParams.toString();
+            }
+          })
+          modal_input_key.show();
+        } else {
+          autosize(document.querySelectorAll('textarea'));
+          $("#btn_calc").on("click", async () => {
+            $("#btn_calc").attr("disabled", "");
+            let tbody = $("#tbody");
+            tbody.html("");
+            let PointA_list = $("#PointA").val().split(/\n/);
+            let PointB_list = $("#PointB").val().split(/\n/);
+            if (PointA_list.length != PointB_list.length && PointB_list.length != 1) {
+              window.alert("[錯誤] A 點清單長度與 B 點清單長度不同\nA 點長度為：" + PointA_list.length + "\nB 點長度為：" + PointB_list.length);
+              $("#btn_calc").removeAttr("disabled");
+              return;
+            }
+
+            /***** If Point B only one, assume every Point A use same Point B *****/
+            let PointB_latlng = null;
+            if (PointB_list.length == 1) {
+              PointB_latlng = await geocoding(PointB_list[0], searchParams.get("API_KEY"));
+            }
+
+            for (let i = 0; i < PointA_list.length; i += 1) {
+              let tr = $("<tr>");
+
+              /**** Point A *****/
+              let PointA_str = $("<td>");
+              let PointA_lng = $("<td>");
+              let PointA_lat = $("<td>");
+              PointA_str.text(PointA_list[i]);
+              PointA_latlng = await geocoding(PointA_list[i], searchParams.get("API_KEY"));
+              if (("lng" in PointA_latlng) && ("lng" in PointA_latlng)) {
+                PointA_lng.text(PointA_latlng.lng);
+                PointA_lat.text(PointA_latlng.lat);
+              } else if ("msg" in PointA_latlng) {
+                console.log(PointA_latlng.msg);
+              }
+              tr.append(PointA_str);
+              tr.append(PointA_lng);
+              tr.append(PointA_lat);
+
+              /**** Point B *****/
+              let PointB_str = $("<td>");
+              let PointB_lng = $("<td>");
+              let PointB_lat = $("<td>");
+              if (PointB_list.length == 1) {
+                PointB_str.text(PointB_list[0]);
+              } else {
+                PointB_str.text(PointB_list[i]);
+                PointB_latlng = await geocoding(PointB, searchParams.get("API_KEY"));
+              }
+              if (("lng" in PointB_latlng) && ("lng" in PointB_latlng)) {
+                PointB_lng.text(PointB_latlng.lng);
+                PointB_lat.text(PointB_latlng.lat);
+              } else if ("msg" in PointB_latlng) {
+                console.log(PointB_latlng.msg);
+              }
+              tr.append(PointB_str);
+              tr.append(PointB_lng);
+              tr.append(PointB_lat);
+
+              /***** Distance *****/
+              let distance = $("<td>");
+              if (PointA_lng.text() != "" && PointA_lat.text() != "" && PointB_lng.text() != "" && PointB_lat.text() != "") {
+                distance.text(
+                  geolib.getDistance(
+                    { longitude: PointA_latlng.lng, latitude: PointA_latlng.lat },
+                    { longitude: PointB_latlng.lng, latitude: PointB_latlng.lat }
+                  ));
+              }
+              tr.append(distance);
+
+              tbody.append(tr);
+            }
+            $("#btn_calc").removeAttr("disabled");
+          });
+
+          $("#btn_export").on("click", () => {
+            $("#btn_export").attr("disabled", "");
+            workbook = XLSX.utils.table_to_book($("table")[0]);
+            XLSX.writeFile(workbook, "result.xlsx");
+            $("#btn_export").removeAttr("disabled");
+          })
+
+          function geocoding(address, key) {
+            if (address == "") return { "msg": "Empty address" };
+            return axios.get("https://maps.googleapis.com/maps/api/geocode/json?address=" + address + "&key=" + key).then(res => {
+              if (res.status != 200) {
+                //window.alert("發生錯誤! 錯誤訊息：" + statusText);
+                return { "msg": statusText }
+              } else {
+                try {
+                  if (res.data.status != "OK") return { "msg": res.data.status };
+                  let location = res.data.results[0].geometry.location;
+                  return location;
+                } catch (e) {
+                  //window.alert("發生錯誤! 錯誤訊息：" + e);
+                  return { "msg": e }
+                }
+              }
+            }).catch(err => {
+              //window.alert("發生錯誤! 錯誤訊息：" + err);
+              return { "msg": err }
+            })
+          }
+        }
+      </script>
+</body>
+
+</html>
