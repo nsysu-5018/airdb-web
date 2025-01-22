@@ -663,140 +663,230 @@
             addr = $('#aqi_address').val();
             date = $('#aqi_based_Day').val();
             period = $('#aqi_EMA_Days').val();
-            if (addr.length == 0 || date.length == 0 || period.length == 0)
-            {
-                window.alert('[空汙數據] 部份欄位尚未填入！');
+            if(addr == ''){
+                Swal.fire({
+                    title: '錯誤',
+                    text: '你沒有填寫「地址」',
+                    icon: 'warning'
+                });
+                return;
+            }
+            else if(date == ''){
+                Swal.fire({
+                    title: '錯誤',
+                    text: '你沒有填寫「空汙基準日」',
+                    icon: 'warning'
+                });
+                return;
+            }
+            else if(period == ''){
+                Swal.fire({
+                    title: '錯誤',
+                    text: '你沒有填寫「空汙回推天數」',
+                    icon: 'warning'
+                });
+                return;
             }
             else
             {
-                $.ajax({
-                    url: "<?php echo base_url('COPD/FetchAQI') ?>",
-                    method: "post",
-                    dataType: "json",
-                    headers: {
-                        '<?= csrf_header() ?>': '<?= csrf_hash() ?>',
-                    },
-                    data: {
-                        addr: $('#aqi_address').val(),
-                        date: $('#aqi_based_Day').val(), 
-                        period: $('#aqi_EMA_Days').val(),
-                    },
-                    success: (result) => {
-                        if (result['detail'])
-                        {
-                            Swal.fire({
-                                title: '錯誤',
-                                html: '伺服器回傳了錯誤訊息！<br/>錯誤訊息：' + result['detail'],
-                                icon: 'error'
-                            });
-                            return;
-                        }
-                        else
-                        {
-                            air_data = result;
-                            $('#aqi_CO').val(air_data["co"]);
-                            $('#aqi_O3').val(air_data["o3"]);
-                            $('#aqi_SO2').val(air_data["so2"]);
-                            $('#aqi_NO').val(air_data["no"]);
-                            $('#aqi_NO2').val(air_data["no2"]);
-                            $('#aqi_NOx').val(air_data["nox"]);
-                            $('#aqi_PM2_5').val(air_data["pm2.5"]);
-                            $('#aqi_PM10').val(air_data["pm10"]);
-                        }
-                    },
-                    error: (xhr) => {
-                        alert("[空汙數據] 發生錯誤，請重試一次");
+                Swal.fire({
+                    title: '讀取空污數據中...',
+                    timerProgressBar: true,
+                    allowOutsideClick: false,
+                    allowEscapeKey: false,
+                    didOpen: () => {
+                        Swal.showLoading();
+                        $.ajax({
+                            url: "<?php echo base_url('COPD/FetchAQI') ?>",
+                            method: "post",
+                            dataType: "json",
+                            headers: {
+                                '<?= csrf_header() ?>': '<?= csrf_hash() ?>',
+                            },
+                            data: {
+                                addr: $('#aqi_address').val(),
+                                date: $('#aqi_based_Day').val(), 
+                                period: $('#aqi_EMA_Days').val(),
+                            },
+                            success: (result) => {
+                                if (result['detail'])
+                                {
+                                    Swal.fire({
+                                        title: '錯誤',
+                                        html: '伺服器回傳了錯誤訊息！<br/>錯誤訊息：' + result['detail'],
+                                        icon: 'error'
+                                    });
+                                    return;
+                                }
+                                else
+                                {
+                                    air_data = result;
+                                    $('#aqi_CO').val(air_data["co"]);
+                                    $('#aqi_O3').val(air_data["o3"]);
+                                    $('#aqi_SO2').val(air_data["so2"]);
+                                    $('#aqi_NO').val(air_data["no"]);
+                                    $('#aqi_NO2').val(air_data["no2"]);
+                                    $('#aqi_NOx').val(air_data["nox"]);
+                                    $('#aqi_PM2_5').val(air_data["pm2.5"]);
+                                    $('#aqi_PM10').val(air_data["pm10"]);
+                                    Swal.close();
+                                }
+                            },
+                            error: (xhr) => {
+                                Swal.fire({
+                                    title: '錯誤',
+                                    html: '讀取空污數據時發生錯誤',
+                                    icon: 'error'
+                                });
+                            }
+                        });
                     }
                 });
             }
         })
 
         $('#btn_predict').on('click', () => {
-            $('#epoch').text("");
-            Swal.fire({
-                title: '模型運算中!',
-                html: '剩餘 <b></b> %',
-                timer: 5000,
-                timerProgressBar: true,
-                allowOutsideClick: false,
-                allowEscapeKey: false,
-                didOpen: () => {
-                    Swal.showLoading();
-                    const b = Swal.getHtmlContainer().querySelector('b');
-                    timerInterval = setInterval(() => {
-                        b.textContent = Math.round(Swal.getTimerLeft() / 5000 * 100);
-                        if ($('#epoch').text() != "") {
-                            clearInterval(timerInterval)
-                            Swal.close();
-                        }
-                    }, 100)
-                },
-                willClose: () => {
-                    clearInterval(timerInterval)
-                }
-            }).then((result) => {
-                /* Read more about handling dismissals below */
-                if (result.dismiss === Swal.DismissReason.timer) {
-                    console.log('I was closed by the timer')
-                }
-            })
+            addr = $('#aqi_address').val();
+            date = $('#aqi_based_Day').val();
+            period = $('#aqi_EMA_Days').val();
 
-            $.ajax({
-                url: "<?php echo base_url('COPD/getAllName')?>",
-                method: "post",
-                headers: {
-                    '<?= csrf_header() ?>': '<?= csrf_hash() ?>',
-                },
-                success: function (data) {
-                    Return_data = JSON.parse(data);
-                    selected_disease = [];
-                    for (i = 0; i < Return_data.length; i++) {
-                        if ($('#' + Return_data[i].replaceAll(' ', '_')).is(':checked'))
-                        {
-                            selected_disease.push(1);
-                        }
-                        else
-                        {
-                            selected_disease.push(0);
-                        }
-                    }
-                    ml_data = {
-                        sO2c: $('#Input_data_sO2c').val(),
-                        dis_list: selected_disease,
-                    }
-                    $.ajax({
-                        url: "<?php echo base_url('COPD/GetResult')?>",
-                        method: "post",
-                        dataType: "json",
-                        headers: {
-                            '<?= csrf_header() ?>': '<?= csrf_hash() ?>',
-                        },
-                        data: {
-                            ml_data: JSON.stringify(ml_data),
-                        },
-                        success: (data) => {
+            if(addr == ''){
+                Swal.fire({
+                    title: '錯誤',
+                    text: '你沒有填寫「地址」',
+                    icon: 'warning'
+                });
+                return;
+            }
+            else if(date == ''){
+                Swal.fire({
+                    title: '錯誤',
+                    text: '你沒有填寫「空汙基準日」',
+                    icon: 'warning'
+                });
+                return;
+            }
+            else if(period == ''){
+                Swal.fire({
+                    title: '錯誤',
+                    text: '你沒有填寫「空汙回推天數」',
+                    icon: 'warning'
+                });
+                return;
+            }
+            else
+            {
+                Swal.fire({
+                    title: '模型運算中...',
+                    timerProgressBar: true,
+                    allowOutsideClick: false,
+                    allowEscapeKey: false,
+                    didOpen: () => {
+                        Swal.showLoading();
 
-                            res = Number(data);
-                            $('#epoch').text(parseFloat(res).toFixed(3) + "%");
-                            if (res >= 80) {
-                                $('#epoch').css('color', '#00DB00');
-                            }else{
-                                $('#epoch').css('color', 'red');
-                            }
+                        checkAllName("<?php echo base_url('COPD/getAllName')?>", (selected_disease) => {
+                            air_data = null;
+                            $.ajax({
+                                url: "<?php echo base_url('COPD/FetchAQI') ?>",
+                                method: "post",
+                                dataType: "json",
+                                headers: {
+                                    '<?= csrf_header() ?>': '<?= csrf_hash() ?>',
+                                },
+                                data: {
+                                    addr: addr,
+                                    date: date, 
+                                    period: period,
+                                },
+                                success: (result) => {
+                                    if (result['detail'])
+                                    {
+                                        $('#epoch').css('color', 'red');
+                                        $('#epoch').text('ERROR!');
+                                        Swal.fire({
+                                            title: '錯誤',
+                                            html: '讀取空污數據時發生錯誤<br/>錯誤訊息：' + result['detail'],
+                                            icon: 'error'
+                                        });
+                                        return;
+                                    }
 
+                                    air_data = result;
+                                    $('#aqi_CO').val(air_data["co"]);
+                                    $('#aqi_O3').val(air_data["o3"]);
+                                    $('#aqi_SO2').val(air_data["so2"]);
+                                    $('#aqi_NO').val(air_data["no"]);
+                                    $('#aqi_NO2').val(air_data["no2"]);
+                                    $('#aqi_NOx').val(air_data["nox"]);
+                                    $('#aqi_PM2_5').val(air_data["pm2.5"]);
+                                    $('#aqi_PM10').val(air_data["pm10"]);
 
-                        },
-                        error: () => {
+                                    ml_data = {
+                                        sO2c: $('#Input_data_sO2c').val(),
+                                        dis_list: selected_disease,
+                                    }
+                                    ml_data_json = JSON.stringify(ml_data);
+
+                                    $.ajax({
+                                        url: "<?php echo base_url('COPD/GetResult')?>",
+                                        method: "post",
+                                        dataType: "json",
+                                        headers: {
+                                            '<?= csrf_header() ?>': '<?= csrf_hash() ?>',
+                                        },
+                                        data:{
+                                            ml_data:ml_data_json,
+                                        },
+                                        success: function (result) {
+                                            res = Number(result);
+                                            
+                                            $("#epoch").text(parseFloat(res).toFixed(3) + "%");
+                                            if (res >= 50)
+                                            {
+                                                $("#epoch").css('color', 'red');
+                                            } else
+                                            {
+                                                $("#epoch").css('color', '#00DB00');
+                                            }
+
+                                            Swal.close();
+                                        },
+                                        error: () => {
+                                            $('#epoch').css('color', 'red');
+                                            $('#epoch').text('ERROR!');
+                                            Swal.fire({
+                                                title: '錯誤',
+                                                html: '獲取模型結果時發生錯誤',
+                                                icon: 'error'
+                                            });
+                                            return;
+                                        }
+                                    });
+                                },
+                                error: () => {
+                                    $('#epoch').css('color', 'red');
+                                    $('#epoch').text('ERROR!');
+                                    Swal.fire({
+                                        title: '錯誤',
+                                        html: '讀取空污數據時發生錯誤',
+                                        icon: 'error'
+                                    });
+                                    return;
+                                }
+                            })
+                        }, () => {
                             $('#epoch').css('color', 'red');
                             $('#epoch').text('ERROR!');
-                        }
-                    });
-                },
-                error: () => {
-                    $('#epoch').css('color', 'red');
-                    $('#epoch').text('ERROR!');
-                }
-            });
+                            Swal.fire({
+                                title: '錯誤',
+                                html: '檢查共病數據時發生錯誤',
+                                icon: 'error'
+                            });
+                            return;
+                        });
+                    }
+                });
+            }
         });
     </script>
 </body>

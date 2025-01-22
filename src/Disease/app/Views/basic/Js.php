@@ -57,3 +57,34 @@ function getAllName(url, target) {
     });
 }
 </script>
+<!-- checkAllName -->
+ <script>
+function checkAllName(url, success_callback, error_callback)
+{
+    $.ajax({
+        url: url,
+        method: "post",
+        headers: {
+            '<?= csrf_header() ?>': '<?= csrf_hash() ?>',
+        },
+        success: (data) => {
+            Return_data = JSON.parse(data);
+            selected_disease = [];
+            for (i = 0; i < Return_data.length; i++) {
+                if ($('#' + Return_data[i].replaceAll(' ', '_')).is(':checked'))
+                {
+                    selected_disease.push(1);
+                }
+                else
+                {
+                    selected_disease.push(0);
+                }
+            }
+            success_callback(selected_disease);
+        },
+        error: () => {
+            error_callback();
+        }
+    })
+}
+</script>

@@ -210,10 +210,66 @@
         <script type="text/javascript">
             getAllName("<?php echo base_url('TB/getAllName')?>", '#inputCheckbox');
 
-            $('#Input_data_disease').on('submit', function (even) {
+            $('#Input_data_disease').on('submit', (even) => {
                 even.preventDefault();
-                var inputText;
-                $('#epoch').html('');
+
+                address = $("#address").val().replaceAll(' ', '');
+                Disease_ID = $("#Disease_ID").val().replaceAll(' ', '');
+                EMA_Days = $("#EMA_Days").val();
+                Based_Day = $("#Based_Day").val();
+                Age = $("#Age").val();
+                Sex = $("#Sex").val();
+                if (Sex == "\u7537")
+                {
+                    Sex = 1;
+                }
+                else
+                {
+                    Sex = 0;
+                }
+                
+                if(address == ''){
+                    Swal.fire({
+                        title: '錯誤',
+                        text: '你沒有填寫「地址」',
+                        icon: 'warning'
+                    });
+                    return;
+                }
+                else if(Disease_ID == ''){
+                    Swal.fire({
+                        title: '錯誤',
+                        text: '你沒有填寫「病歷編號」',
+                        icon: 'warning'
+                    });
+                    return;
+                }
+                else if(EMA_Days == ''){
+                    Swal.fire({
+                        title: '錯誤',
+                        text: '你沒有填寫「空汙回推天數」',
+                        icon: 'warning'
+                    });
+                    return;
+                }
+                else if(Based_Day == ''){
+                    Swal.fire({
+                        title: '錯誤',
+                        text: '你沒有填寫「空汙基準日」',
+                        icon: 'warning'
+                    });
+                    return;
+                }
+                else if(Age == ''){
+                    Swal.fire({
+                        title: '錯誤',
+                        text: '你沒有填寫「年齡」',
+                        icon: 'warning'
+                    });
+                    return;
+                }
+
+                $('#epoch').text('');
                 $('#CO').val('');
                 $('#O3').val('');
                 $('#NO').val('');
@@ -222,250 +278,191 @@
                 $('#NOx').val('');
                 $('#PM2_5').val('');
                 $('#PM10').val('');
-                $.ajax({
-                    url: "<?php echo base_url('TB/getAllName')?>",
-                    method: "post",
-                    headers: {
-                        '<?= csrf_header() ?>': '<?= csrf_hash() ?>',
-                    },
-                    success: function (data) {
-                        let timerInterval
-                        Swal.fire({
-                            title: '模型運算中!',
-                            html: '剩餘 <b></b> %',
-                            timer: 1000,
-                            timerProgressBar: true,
-                            allowOutsideClick: false,
-                            allowEscapeKey: false,
-                            didOpen: () => {
-                            Swal.showLoading()
-                            const b = Swal.getHtmlContainer().querySelector('b')
-                            timerInterval = setInterval(() => {
-                                b.textContent = Math.round(Swal.getTimerLeft()/1000*100)
-                                if(document.getElementById("epoch").innerHTML != ""){
-                                clearInterval(timerInterval)
-                                Swal.close();
-                                }
-                            }, 100)
-                            },
-                            willClose: () => {
-                            clearInterval(timerInterval)
-                            }
-                        }).then((result) => {
-                            /* Read more about handling dismissals below */
-                            if (result.dismiss === Swal.DismissReason.timer) {
-                            console.log('I was closed by the timer')
-                            }
-                        })
-                        var Return_data = JSON.parse(data);
-                        var inputTextselect = "";
-                        for (var i = 0; i < Return_data.length; i++) {
-                            var DiseaseName = document.getElementById(Return_data[i].replaceAll(' ', '_'));
-                            //console.log(Return_data[i].replaceAll(' ', '_'))
-                            if (DiseaseName.checked == true) {//concate disease name
-                                //inputTextselect += (Return_data[i] + "~");
-                                inputTextselect += ("1" + " ");
-                            }
-                            else {
-                                inputTextselect += ("0" + " ")
-                            }
-                        }
-                        var Sex = document.getElementById("Sex").value
-                        if (Sex == "\u7537"){
-                            Sex = 1;
-                        }
-                        else{
-                            Sex = 0;
-                        }
-                        var inputTextselect = inputTextselect.substring(0, inputTextselect.length - 1).replaceAll(' ', ',');
-                        var array = inputTextselect.split(",").map(Number);
-                        address = document.getElementById("address").value.replaceAll(' ', '');
-                        EMA_Days = document.getElementById("EMA_Days").value;
-                        Based_Day = document.getElementById("Based_Day").value;
-                        Age = document.getElementById("Age").value;
-                        
-                        if(address == ''){
-                            alert("Address miss");
-                            document.getElementById("epoch").style.color = "red";
-                            document.getElementById("epoch").innerHTML = "Miss address";
-                        }
-                        else if(Disease_ID == ''){
-                            alert("ID miss");
-                            document.getElementById("epoch").style.color = "red";
-                            document.getElementById("epoch").innerHTML = "Miss ID";
-                        }
-                        else if(Based_Day == ''){
-                            alert("Based day miss");
-                            document.getElementById("epoch").style.color = "red";
-                            document.getElementById("epoch").innerHTML = "Miss based day";
-                        }
-                        else if(Age == ''){
-                            alert("Age miss");
-                            document.getElementById("epoch").style.color = "red";
-                            document.getElementById("epoch").innerHTML = "Miss age";
-                        }
-                        
-                        Disease_ID = document.getElementById("Disease_ID").value.replaceAll(' ', '');
-                        var addr = address
-                        var date = Based_Day
-                        var period = EMA_Days
-                        $.ajax({
-                            url: "<?php echo base_url('TB/FetchAQI') ?>",
-                            method: "post",
-                            dataType: "json",
-                            headers: {
-                                '<?= csrf_header() ?>': '<?= csrf_hash() ?>',
-                            },
-                            data: {
-                                addr: addr,
-                                date: date, 
-                                period: period,
-                            },
-                            success: function(result){
-                                if (result['detail'])
-                                {
-                                    Swal.fire({
-                                        title: '錯誤',
-                                        html: '伺服器回傳了錯誤訊息！<br/>錯誤訊息：' + result['detail'],
-                                        icon: 'error'
-                                    });
-                                    return;
-                                }
-                                air_data = result 
-                                var ml_data = {
+
+                Swal.fire({
+                    title: '模型運算中...',
+                    timerProgressBar: true,
+                    allowOutsideClick: false,
+                    allowEscapeKey: false,
+                    didOpen: () => {
+                        Swal.showLoading();
+
+                        checkAllName("<?php echo base_url('TB/getAllName')?>", (selected_disease) => {
+                            air_data = null;
+                            $.ajax({
+                                url: "<?php echo base_url('TB/FetchAQI') ?>",
+                                method: "post",
+                                dataType: "json",
+                                headers: {
+                                    '<?= csrf_header() ?>': '<?= csrf_hash() ?>',
+                                },
+                                data: {
+                                    addr: address,
+                                    date: Based_Day, 
+                                    period: EMA_Days,
+                                },
+                                success: (result) => {
+                                    if (result['detail'])
+                                    {
+                                        $('#epoch').css('color', 'red');
+                                        $('#epoch').text('ERROR!');
+                                        Swal.fire({
+                                            title: '錯誤',
+                                            html: '讀取空污數據時發生錯誤<br/>錯誤訊息：' + result['detail'],
+                                            icon: 'error'
+                                        });
+                                        return;
+                                    }
+
+                                    air_data = result;
+
+                                    $('#CO').val(air_data["co"]);
+                                    if (air_data["co"] >= 9.4)
+                                    {
+                                        $('#CO').css('color', 'red');
+                                    }
+                                    else
+                                    {
+                                        $('#CO').css('color', '#00DB00');
+                                    }
+
+                                    $('#O3').val(air_data["o3"]);
+                                    if (air_data["o3"] >= 70)
+                                    {
+                                        $('#O3').css('color', 'red');
+                                    }
+                                    else
+                                    {
+                                        $('#O3').css('color', '#00DB00');
+                                    }
+
+                                    $('#NO').val(air_data["no"]);
+                                    if (air_data["no"] >= 360)
+                                    {
+                                        $('#NO').css('color', 'red');
+                                    }
+                                    else
+                                    {
+                                        $('#NO').css('color', '#00DB00');
+                                    }
+
+                                    $('#SO2').val(air_data["so2"]);
+                                    if (air_data["so2"] >= 75)
+                                    {
+                                        $('#SO2').css('color', 'red');
+                                    }
+                                    else
+                                    {
+                                        $('#SO2').css('color', '#00DB00');
+                                    }
+
+                                    $('#NO2').val(air_data["no2"]);
+                                    if (air_data["no2"] >= 100)
+                                    {
+                                        $('#NO2').css('color', 'red');
+                                    }
+                                    else
+                                    {
+                                        $('#NO2').css('color', '#00DB00');
+                                    }
+
+                                    $('#NOx').val(air_data["nox"]);
+                                    if (air_data["nox"] >= 360)
+                                    {
+                                        $('#NOx').css('color', 'red');
+                                    }
+                                    else
+                                    {
+                                        $('#NOx').css('color', '#00DB00');
+                                    }
+
+                                    $('#PM2_5').val(air_data["pm2.5"]);
+                                    if (air_data["pm2.5"] >= 35.4)
+                                    {
+                                        $('#PM2_5').css('color', 'red');
+                                    }
+                                    else
+                                    {
+                                        $('#PM2_5').css('color', '#00DB00');
+                                    }
+
+                                    $('#PM10').val(air_data["pm10"]);
+                                    if (air_data["pm10"] >= 100)
+                                    {
+                                        $('#PM10').css('color', 'red');
+                                    }
+                                    else
+                                    {
+                                        $('#PM10').css('color', '#00DB00');
+                                    }
+
+                                    ml_data = {
                                         "sex": Number(Sex),
                                         "age": Number(Age),
                                         "address": address,
                                         "id": Disease_ID,
                                         "date": Based_Day,
-                                        "dis_list": array,
+                                        "dis_list": selected_disease,
                                         "air_data": air_data,
                                     }
-                                var ml_data_json = JSON.stringify(ml_data);
-                                $.ajax({
-                                    url: "<?php echo base_url('TB/GetResult')?>",
-                                    method: "post",
-                                    dataType: "json",
-                                    headers: {
-                                        '<?= csrf_header() ?>': '<?= csrf_hash() ?>',
-                                    },
-                                    data:{
-                                        ml_data:ml_data_json,
-                                    },
+                                    ml_data_json = JSON.stringify(ml_data);
 
-                                    success: function (result) {
-                                        console.log(result);
-                                        
-                                        res = Number(result);
-                                        //.split("~");
-                                        
-                                        if (res >= 50) {
-                                            document.getElementById("epoch").style.color = "red";
-                                            document.getElementById("epoch").innerHTML = parseFloat(res).toFixed(3) + "%";
-                                        } else {
-                                            document.getElementById("epoch").style.color = "#00DB00";
-                                            document.getElementById("epoch").innerHTML = parseFloat(res).toFixed(3) + "%";
-                                        }
+                                    $.ajax({
+                                        url: "<?php echo base_url('TB/GetResult')?>",
+                                        method: "post",
+                                        dataType: "json",
+                                        headers: {
+                                            '<?= csrf_header() ?>': '<?= csrf_hash() ?>',
+                                        },
+                                        data:{
+                                            ml_data:ml_data_json,
+                                        },
+                                        success: function (result) {
+                                            res = Number(result);
+                                            
+                                            $("#epoch").text(parseFloat(res).toFixed(3) + "%");
+                                            if (res >= 50)
+                                            {
+                                                $("#epoch").css('color', 'red');
+                                            } else
+                                            {
+                                                $("#epoch").css('color', '#00DB00');
+                                            }
 
-                                        $('#CO').val(air_data["co"]);
-                                        if (air_data["co"] >= 9.4)
-                                        {
-                                            $('#CO').css('color', 'red');
+                                            Swal.close();
+                                        },
+                                        error: () => {
+                                            $('#epoch').css('color', 'red');
+                                            $('#epoch').text('ERROR!');
+                                            Swal.fire({
+                                                title: '錯誤',
+                                                html: '獲取模型結果時發生錯誤',
+                                                icon: 'error'
+                                            });
+                                            return;
                                         }
-                                        else
-                                        {
-                                            $('#CO').css('color', '#00DB00');
-                                        }
-
-                                        $('#O3').val(air_data["o3"]);
-                                        if (air_data["o3"] >= 70)
-                                        {
-                                            $('#O3').css('color', 'red');
-                                        }
-                                        else
-                                        {
-                                            $('#O3').css('color', '#00DB00');
-                                        }
-
-                                        $('#NO').val(air_data["no"]);
-                                        if (air_data["no"] >= 360)
-                                        {
-                                            $('#NO').css('color', 'red');
-                                        }
-                                        else
-                                        {
-                                            $('#NO').css('color', '#00DB00');
-                                        }
-
-                                        $('#SO2').val(air_data["so2"]);
-                                        if (air_data["so2"] >= 75)
-                                        {
-                                            $('#SO2').css('color', 'red');
-                                        }
-                                        else
-                                        {
-                                            $('#SO2').css('color', '#00DB00');
-                                        }
-
-                                        $('#NO2').val(air_data["no2"]);
-                                        if (air_data["no2"] >= 100)
-                                        {
-                                            $('#NO2').css('color', 'red');
-                                        }
-                                        else
-                                        {
-                                            $('#NO2').css('color', '#00DB00');
-                                        }
-
-                                        $('#NOx').val(air_data["nox"]);
-                                        if (air_data["nox"] >= 360)
-                                        {
-                                            $('#NOx').css('color', 'red');
-                                        }
-                                        else
-                                        {
-                                            $('#NOx').css('color', '#00DB00');
-                                        }
-
-                                        $('#PM2_5').val(air_data["pm2.5"]);
-                                        if (air_data["pm2.5"] >= 35.4)
-                                        {
-                                            $('#PM2_5').css('color', 'red');
-                                        }
-                                        else
-                                        {
-                                            $('#PM2_5').css('color', '#00DB00');
-                                        }
-
-                                        $('#PM10').val(air_data["pm10"]);
-                                        if (air_data["pm10"] >= 100)
-                                        {
-                                            $('#PM10').css('color', 'red');
-                                        }
-                                        else
-                                        {
-                                            $('#PM10').css('color', '#00DB00');
-                                        }
-                                    },
-                                    error: function () {
-                                        console.log("error: " + result);
-                                        document.getElementById("epoch").style.color = "red";
-                                        document.getElementById("epoch").innerHTML = "Error";
-                                    }
-                                })
-                            },
-                            error: function(xhr){
-                                switch (xhr.status) {
-                                    case 403:
-                                        alert("IP位址不允許");
-                                        break;
-                                    case 404:
-                                        alert("資料欄位不正確");
-                                        break;
-                                    default:
-                                        alert("發生錯誤，請重試一次");
+                                    });
+                                },
+                                error: () => {
+                                    $('#epoch').css('color', 'red');
+                                    $('#epoch').text('ERROR!');
+                                    Swal.fire({
+                                        title: '錯誤',
+                                        html: '讀取空污數據時發生錯誤',
+                                        icon: 'error'
+                                    });
+                                    return;
                                 }
-                            }
+                            })
+                        }, () => {
+                            $('#epoch').css('color', 'red');
+                            $('#epoch').text('ERROR!');
+                            Swal.fire({
+                                title: '錯誤',
+                                html: '檢查共病數據時發生錯誤',
+                                icon: 'error'
+                            });
+                            return;
                         });
                     }
                 });
