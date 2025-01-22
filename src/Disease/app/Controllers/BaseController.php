@@ -41,7 +41,8 @@ abstract class BaseController extends Controller
      * Be sure to declare properties for any property fetch you initialized.
      * The creation of dynamic property is deprecated in PHP 8.2.
      */
-    // protected $session;
+    protected $session;
+    protected $db;
 
     /**
      * @return void
@@ -54,5 +55,46 @@ abstract class BaseController extends Controller
         // Preload any models, libraries, etc, here.
 
         // E.g.: $this->session = service('session');
+        $this->session = \Config\Services::session();
+        $this->db = \Config\Database::connect();
+    }
+
+    /**
+     * Logout
+     */
+    public function postLogout()
+    {
+        $this->session->remove('user');
+    }
+
+    /**
+     * GetAllName
+     */
+    public function postGetAllName()
+    {
+        if($this->session->get('user')!="")
+        {
+            $result_array = array(
+                "HBV",
+                "HCV",
+                "Cancer",
+                "Dementia",
+                "Hyperlipidemia",
+                "Diabetes Mellitus",
+                "Myocardial Infraction",
+                "Chronic Kidney Disease",
+                "Cerebrovascular Disease",
+                "Congestive Heart Failure",
+                "Peripheral Vascular Disease",
+                "Pneumonia",
+                "Obstructive Lung Disease",
+                "Acute Renal Failure",
+            );
+            echo json_encode($result_array);
+        }
+        else
+        {
+            return $this->response->setStatusCode(401);
+        }
     }
 }
