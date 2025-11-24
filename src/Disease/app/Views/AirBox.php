@@ -152,7 +152,7 @@
                 },
                 success: function (result) {
                             console.log(result)
-                            res = result[0].replaceAll('~', '<br>');
+                            res = result.replaceAll('~', '<br>');
                             document.getElementById("airBoxResult").innerHTML =
                                 "<div class='card m-b-30'> <div class='card-body'> <h8>" + res + "</h8> </div> </div>";
                             
