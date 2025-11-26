@@ -27,8 +27,8 @@ class Database extends Config
     public array $default = [
         'DSN'          => '',
         'hostname'     => 'airdb_db',
-        'username'     => 'web',
-        'password'     => 'REDACTED',
+        'username'     => '',
+        'password'     => '',
         'database'     => 'web',
         'DBDriver'     => 'MySQLi',
         'DBPrefix'     => '',
