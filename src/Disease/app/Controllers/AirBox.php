@@ -18,7 +18,7 @@ class AirBox extends BaseController
 
     public function postGetResult()
     {
-        $url = 'http://airdb_model_airBox:8000/run';
+        $url = 'http://airdb_model_airBox:8000/air-quality/query';
         $address=$this->request->GetPost('address');
         
         $headerArray=array("Content-type:application/json;","Accept:application/json");
