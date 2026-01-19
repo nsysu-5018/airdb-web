@@ -10,7 +10,7 @@
                     <a href="javascript:void(0);" class="waves-effect"><i class="icon-mail-open"></i><span> 疾病模型 <span class="float-end menu-arrow"><i class="mdi mdi-chevron-right"></i></span> </span></a>
                     <ul class="submenu">
                         <li><a href="<?php echo base_url("AirBox") ?>">PM2.5週趨勢</a></li>
-                        <li><a href="<?php echo base_url("AirMA") ?>">空汙平均</a></li>
+                        <li><a href="<?php echo base_url("AQI") ?>">空汙平均</a></li>
                         <li><a href="<?php echo base_url("TB") ?>">肺結核</a></li>
                         <li><a href="<?php echo base_url("COPD") ?>">慢性阻塞性肺病</a></li>
                         <li><a href="<?php echo base_url("ALRD") ?>">急性下呼吸道疾病</a></li>

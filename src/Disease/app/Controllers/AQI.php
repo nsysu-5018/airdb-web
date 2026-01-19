@@ -2,13 +2,13 @@
 
 namespace App\Controllers;
 
-class AirMA extends BaseController
+class AQI extends BaseController
 {
     public function getIndex()
     {
         if($this->session->get('user')!="")
         {
-            return view('AirMA');
+            return view('AQI');
         }
         else
         {

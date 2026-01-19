@@ -226,7 +226,7 @@
         })
 
         $.ajax({
-            url: "<?php echo base_url('AirMA/FetchAQI') ?>",
+            url: "<?php echo base_url('AQI/FetchAQI') ?>",
             method: "post",
             dataType: "json",
             headers: {
