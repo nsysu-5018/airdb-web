@@ -36,7 +36,7 @@ class TB extends BaseController
 
     function postGetResult()
     {
-        $url = 'http://airdb_model_TB:8000/predict';
+        $url = 'http://airdb_TB:8000/predict';
         $ml_data=$this->request->GetPost('ml_data');
         
         $headerArray=array("Content-type:application/json;","Accept:application/json");
