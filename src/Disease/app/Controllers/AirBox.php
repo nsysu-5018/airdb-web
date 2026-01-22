@@ -18,7 +18,7 @@ class AirBox extends BaseController
 
     public function postGetResult()
     {
-        $url = 'http://airdb_model_airBox:8000/air-quality/query';
+        $url = 'http://airdb_airBox:8000/air-quality/query';
         $address=$this->request->GetPost('address');
         
         $headerArray=array("Content-type:application/json;","Accept:application/json");
@@ -38,7 +38,7 @@ class AirBox extends BaseController
 
     public function getGetTotal()
     {
-        $url = 'http://airdb_model_airBox:8000/plots/total';
+        $url = 'http://airdb_airBox:8000/plots/total';
         
         $ch = curl_init($url);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
@@ -53,7 +53,7 @@ class AirBox extends BaseController
 
     public function getGetPm25Average()
     {
-        $url = 'http://airdb_model_airBox:8000/plots/pm25_average';
+        $url = 'http://airdb_airBox:8000/plots/pm25_average';
         
         $ch = curl_init($url);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
