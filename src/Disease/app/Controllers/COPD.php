@@ -36,7 +36,7 @@ class COPD extends BaseController
 
     public function postGetResult()
     {
-        $url = 'http://airdb_model_COPD:8000/predict';
+        $url = 'http://airdb_COPD:8000/predict';
         $ml_data=$this->request->GetPost('ml_data');
         
         $headerArray=array("Content-type:application/json;","Accept:application/json");
