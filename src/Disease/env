@@ -14,7 +14,11 @@
 # ENVIRONMENT
 #--------------------------------------------------------------------
 
-# CI_ENVIRONMENT = production
+# Development
+# CI_ENVIRONMENT=development
+
+# Production
+# CI_ENVIRONMENT=production
 
 #--------------------------------------------------------------------
 # APP
