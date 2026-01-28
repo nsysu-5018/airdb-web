@@ -1,25 +1,11 @@
-# airdb web
+# airdb-web
 
-To set up your environment variables:
+Web interface for the airdb platform.
 
-1. Create your own `.env` file by copying the template:
+## 📚 Documentation
 
-```bash
-cp src/Disease/env src/Disease/.env
-```
+This service is part of the airdb stack and cannot run independently.
 
-2. Edit `src/Disease/.env` and configure your base URL, database user and password:
+**For complete setup and deployment instructions, please see:**
 
-Uncomment and set your application base URL:
-
-
-```
-# app.baseURL=http://your-base-url.com
-```
-
-Uncomment and set your database credentials:
-
-```
-# database.default.username = your_username
-# database.default.password = your_password
-```
+**[airdb Stack Repository](https://github.com/nsysu-5018/airdb)**
