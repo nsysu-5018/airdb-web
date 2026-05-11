@@ -91,8 +91,8 @@
                                                     <label class="col-sm-2 col-form-label">性別</label>
                                                     <div class="col-sm-10">
                                                     <select class="form-control" id="Sex">
-                                                        <option selected>男</option>
-                                                        <option>女</option>
+                                                        <option selected value="1">男</option>
+                                                        <option value="0">女</option>
                                                     </select>
                                                     </div>
                                                 </div>
@@ -219,14 +219,6 @@
                 Based_Day = $("#Based_Day").val();
                 Age = $("#Age").val();
                 Sex = $("#Sex").val();
-                if (Sex == "\u7537")
-                {
-                    Sex = 1;
-                }
-                else
-                {
-                    Sex = 0;
-                }
                 
                 if(address == ''){
                     Swal.fire({
