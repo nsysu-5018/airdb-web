@@ -152,6 +152,15 @@
                 },
                 success: function (result) {
                             console.log(result)
+                    if(typeof result === 'object'){
+                        Swal.fire({
+                            title: '錯誤',
+                            html: result['detail'],
+                            icon: 'error'
+                        });
+                        return;
+                    }
+                    
                             res = result.replaceAll('~', '<br>');
                             document.getElementById("airBoxResult").innerHTML =
                                 "<div class='card m-b-30'> <div class='card-body'> <h8>" + res + "</h8> </div> </div>";
