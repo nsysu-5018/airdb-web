@@ -113,34 +113,15 @@
             address = document.getElementById("address").value.replaceAll(' ', '');
             var timestamp = Date.now();
             Disease_ID = 122;
-            let timerInterval
             Swal.fire({
                 title: '模型運算中!',
-                html: '剩餘 <b></b> %',
-                timer: 3000,
                 timerProgressBar: true,
                 allowOutsideClick: false,
                 allowEscapeKey: false,
                 didOpen: () => {
-                    Swal.showLoading()
-                    const b = Swal.getHtmlContainer().querySelector('b')
-                    timerInterval = setInterval(() => {
-                        b.textContent = Math.round(Swal.getTimerLeft()/3000*100)
-                        if(document.getElementById("imageShow").innerHTML != ""){
-                            clearInterval(timerInterval)
-                            Swal.close();
-                        }
-                    }, 100)
+                    Swal.showLoading();
                 },
-                willClose: () => {
-                    clearInterval(timerInterval)
-                }
-            }).then((result) => {
-                /* Read more about handling dismissals below */
-                if (result.dismiss === Swal.DismissReason.timer) {
-                    console.log('I was closed by the timer')
-                }
-            })
+            });
             $.ajax({
                 url: "<?php echo base_url('AirBox/GetResult')?>",
                 method: "post",
@@ -168,6 +149,7 @@
                     
                     document.getElementById("imageShow").innerHTML =
                         "<img src='<?php echo base_url('airBox/getTotal')?>?ver=" + timestamp + "'  width='100%'/> <br> <br> <img src='<?php echo base_url('airBox/getPm25Average')?>?ver=" + timestamp + "'  width='100%'/>";
+                    Swal.close();
                 }
                 /*,
                 error: function (data) {
