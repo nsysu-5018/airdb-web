@@ -198,32 +198,13 @@
 
         Swal.fire({
             title: '空汙運算中!',
-            html: '剩餘 <b></b> %',
-            timer: 3000,
             timerProgressBar: true,
             allowOutsideClick: false,
             allowEscapeKey: false,
             didOpen: () => {
-            Swal.showLoading()
-            const b = Swal.getHtmlContainer().querySelector('b')
-            timerInterval = setInterval(() => {
-                b.textContent = Math.round(Swal.getTimerLeft()/3000*100);
-                if($('#CO').val() != '')
-                {
-                    clearInterval(timerInterval)
-                    Swal.close();
-                }
-            }, 100)
+                Swal.showLoading();
             },
-            willClose: () => {
-                clearInterval(timerInterval)
-            }
-        }).then((result) => {
-            /* Read more about handling dismissals below */
-            if (result.dismiss === Swal.DismissReason.timer) {
-            console.log('I was closed by the timer')
-            }
-        })
+        });
 
         $.ajax({
             url: "<?php echo base_url('AQI/FetchAQI') ?>",
@@ -328,6 +309,7 @@
                 {
                     $('#PM10').css('color', '#00DB00');
                 }
+                Swal.close();
             },
             error: function (xhr) {
                 Swal.fire({
