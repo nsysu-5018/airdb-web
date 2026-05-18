@@ -111,35 +111,36 @@
             document.getElementById("airBoxResult").innerHTML = "";
             document.getElementById("imageShow").innerHTML = "";
             address = document.getElementById("address").value.replaceAll(' ', '');
-            var timestamp = Date.now()	
+            var timestamp = Date.now();
             Disease_ID = 122;
             let timerInterval
-                    Swal.fire({
-                        title: '模型運算中!',
-                        html: '剩餘 <b></b> %',
-                        timer: 3000,
-                        timerProgressBar: true,
-                        allowOutsideClick: false,
-                        allowEscapeKey: false,
-                        didOpen: () => {
-                        Swal.showLoading()
-                        const b = Swal.getHtmlContainer().querySelector('b')
-                        timerInterval = setInterval(() => {
-                                    b.textContent = Math.round(Swal.getTimerLeft()/3000*100)
-                                if(document.getElementById("imageShow").innerHTML != ""){
-                                    clearInterval(timerInterval)
-                                    Swal.close();
-                            }
-                        }, 100)},
-                        willClose: () => {
+            Swal.fire({
+                title: '模型運算中!',
+                html: '剩餘 <b></b> %',
+                timer: 3000,
+                timerProgressBar: true,
+                allowOutsideClick: false,
+                allowEscapeKey: false,
+                didOpen: () => {
+                    Swal.showLoading()
+                    const b = Swal.getHtmlContainer().querySelector('b')
+                    timerInterval = setInterval(() => {
+                        b.textContent = Math.round(Swal.getTimerLeft()/3000*100)
+                        if(document.getElementById("imageShow").innerHTML != ""){
                             clearInterval(timerInterval)
+                            Swal.close();
                         }
-                    }).then((result) => {
-                      /* Read more about handling dismissals below */
-                      if (result.dismiss === Swal.DismissReason.timer) {
-                        console.log('I was closed by the timer')
-                      }
-                    })
+                    }, 100)
+                },
+                willClose: () => {
+                    clearInterval(timerInterval)
+                }
+            }).then((result) => {
+                /* Read more about handling dismissals below */
+                if (result.dismiss === Swal.DismissReason.timer) {
+                    console.log('I was closed by the timer')
+                }
+            })
             $.ajax({
                 url: "<?php echo base_url('AirBox/GetResult')?>",
                 method: "post",
@@ -148,10 +149,10 @@
                     '<?= csrf_header() ?>': '<?= csrf_hash() ?>',
                 },
                 data: {
-                        "address": address,
+                    "address": address,
                 },
                 success: function (result) {
-                            console.log(result)
+                    console.log(result)
                     if(typeof result === 'object'){
                         Swal.fire({
                             title: '錯誤',
@@ -161,21 +162,20 @@
                         return;
                     }
                     
-                            res = result.replaceAll('~', '<br>');
-                            document.getElementById("airBoxResult").innerHTML =
-                                "<div class='card m-b-30'> <div class='card-body'> <h8>" + res + "</h8> </div> </div>";
-                            
-                            document.getElementById("imageShow").innerHTML =
-                                "<img src='<?php echo base_url('airBox/getTotal')?>?ver=" + timestamp + "'  width='100%'/> <br> <br> <img src='<?php echo base_url('airBox/getPm25Average')?>?ver=" + timestamp + "'  width='100%'/>";
+                    res = result.replaceAll('~', '<br>');
+                    document.getElementById("airBoxResult").innerHTML =
+                        "<div class='card m-b-30'> <div class='card-body'> <h8>" + res + "</h8> </div> </div>";
+                    
+                    document.getElementById("imageShow").innerHTML =
+                        "<img src='<?php echo base_url('airBox/getTotal')?>?ver=" + timestamp + "'  width='100%'/> <br> <br> <img src='<?php echo base_url('airBox/getPm25Average')?>?ver=" + timestamp + "'  width='100%'/>";
                 }
-                        /*,
-                        error: function (data) {
-                            document.getElementById('alertify-error').click();
-                        }*/
-                });
+                /*,
+                error: function (data) {
+                    document.getElementById('alertify-error').click();
+                }*/
             });
-            
         });
+    });
 </script>
 
 </html>
